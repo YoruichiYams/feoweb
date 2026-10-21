@@ -34,6 +34,29 @@ export interface BroadcastResult {
 }
 
 const TG_STORAGE_KEY = 'hotel_tg_subscribers_v1';
+const TG_DELETED_KEY = 'hotel_tg_deleted_ids_v1';
+
+/**
+ * Get blacklist of deleted subscriber chat IDs
+ */
+export function getDeletedTelegramIds(): string[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const stored = localStorage.getItem(TG_DELETED_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Save blacklist of deleted subscriber chat IDs
+ */
+export function saveDeletedTelegramIds(ids: string[]): void {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(TG_DELETED_KEY, JSON.stringify(ids));
+  }
+}
 
 // Default empty subscriber list (no hardcoded mock users)
 const INITIAL_SUBSCRIBERS: TelegramSubscriber[] = [];
@@ -114,6 +137,12 @@ export function saveLocalTelegramSubscribers(subscribers: TelegramSubscriber[]):
  * Add or activate subscriber in local store
  */
 export function registerLocalSubscriber(subscriber: Omit<TelegramSubscriber, 'id' | 'created_at'>): TelegramSubscriber {
+  // If explicitly re-added, remove from deleted blacklist
+  const deleted = getDeletedTelegramIds();
+  if (deleted.includes(subscriber.chat_id)) {
+    saveDeletedTelegramIds(deleted.filter((id) => id !== subscriber.chat_id));
+  }
+
   const current = getLocalTelegramSubscribers();
   const existingIdx = current.findIndex((s) => s.chat_id === subscriber.chat_id);
   
@@ -145,6 +174,13 @@ export function removeLocalSubscriber(chatId: string): void {
   const current = getLocalTelegramSubscribers();
   const filtered = current.filter((s) => s.chat_id !== chatId);
   saveLocalTelegramSubscribers(filtered);
+
+  // Blacklist the deleted chatId so syncTelegramUpdates won't re-add it
+  const deleted = getDeletedTelegramIds();
+  if (!deleted.includes(chatId)) {
+    deleted.push(chatId);
+    saveDeletedTelegramIds(deleted);
+  }
 }
 
 /**
@@ -211,11 +247,17 @@ export async function syncTelegramUpdates(botToken: string): Promise<{
     }
 
     let newCount = 0;
+    const deletedIds = getDeletedTelegramIds();
+
     for (const update of data.result) {
       const msg = update.message || update.edited_message;
       if (!msg || !msg.chat) continue;
 
       const chatId = String(msg.chat.id);
+      if (deletedIds.includes(chatId)) {
+        continue;
+      }
+
       const username = msg.from?.username || msg.chat?.username || undefined;
       const firstName = [msg.from?.first_name || msg.chat?.first_name, msg.from?.last_name || msg.chat?.last_name]
         .filter(Boolean)
