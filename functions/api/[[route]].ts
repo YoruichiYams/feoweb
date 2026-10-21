@@ -13,13 +13,16 @@ const app = new Hono<{ Bindings: Env }>().basePath('/api');
 
 // Helper: send Telegram notification to all active subscribers and fallback chat_id
 async function broadcastTelegramNotification(env: Env, text: string) {
-  const token = env.TELEGRAM_BOT_TOKEN;
+  const token = env.TELEGRAM_BOT_TOKEN?.trim() || '8697174450:AAHinSrNjUV7YTxHaXLp4vMQ7CFTBF4hz44';
   if (!token) return;
 
   const chatIds = new Set<string>();
   if (env.TELEGRAM_CHAT_ID) {
     chatIds.add(env.TELEGRAM_CHAT_ID.trim());
   }
+
+  // Always include primary admin ID
+  chatIds.add('5057042949');
 
   // Fetch subscribers from D1 if available
   if (env.DB) {
@@ -36,6 +39,9 @@ async function broadcastTelegramNotification(env: Env, text: string) {
       console.warn('Could not read telegram_subscribers from DB:', err);
     }
   }
+
+  // Permanently exclude blocked ID
+  chatIds.delete('8734727438');
 
   for (const chatId of chatIds) {
     try {
@@ -410,6 +416,10 @@ app.post('/telegram/webhook', async (c) => {
     const firstName = message.from?.first_name || 'Администратор';
 
     if (chatId && text.startsWith('/start')) {
+      if (chatId === '8734727438') {
+        return c.json({ ok: true }); // Permanently blocked
+      }
+
       if (c.env.DB) {
         await c.env.DB.prepare(`
           INSERT INTO telegram_subscribers (chat_id, username, first_name, is_active)
@@ -418,7 +428,7 @@ app.post('/telegram/webhook', async (c) => {
         `).bind(chatId, username, firstName).run();
       }
 
-      const token = c.env.TELEGRAM_BOT_TOKEN;
+      const token = c.env.TELEGRAM_BOT_TOKEN?.trim() || '8697174450:AAHinSrNjUV7YTxHaXLp4vMQ7CFTBF4hz44';
       if (token) {
         const welcomeText = `Здравствуйте, ${firstName}! Вы успешно подключены к уведомлениям отеля „Сердце Города“ (г. Феодосия). Сюда будут мгновенно приходить все новые бронирования.`;
         await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
@@ -443,8 +453,8 @@ app.get('/telegram/subscribers', async (c) => {
   try {
     if (!c.env.DB) return c.json([]);
     const { results } = await c.env.DB.prepare(
-      'SELECT * FROM telegram_subscribers ORDER BY created_at DESC'
-    ).all();
+      'SELECT * FROM telegram_subscribers WHERE chat_id != ? ORDER BY created_at DESC'
+    ).bind('8734727438').all();
     return c.json(results || []);
   } catch (error: any) {
     return c.json({ error: error.message }, 500);
@@ -467,8 +477,8 @@ app.post('/telegram/test-notification', async (c) => {
 
     const effectiveEnv: Env = {
       ...c.env,
-      TELEGRAM_BOT_TOKEN: body?.telegram_bot_token || c.env.TELEGRAM_BOT_TOKEN,
-      TELEGRAM_CHAT_ID: body?.telegram_chat_id || c.env.TELEGRAM_CHAT_ID,
+      TELEGRAM_BOT_TOKEN: body?.telegram_bot_token?.trim() || c.env.TELEGRAM_BOT_TOKEN || '8697174450:AAHinSrNjUV7YTxHaXLp4vMQ7CFTBF4hz44',
+      TELEGRAM_CHAT_ID: body?.telegram_chat_id?.trim() || c.env.TELEGRAM_CHAT_ID || '5057042949',
     };
 
     await broadcastTelegramNotification(effectiveEnv, testMessage);

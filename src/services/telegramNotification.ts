@@ -1,4 +1,5 @@
 import { HotelSettings } from '../types';
+import { TELEGRAM_CONFIG } from '../config/telegram';
 
 export interface TelegramSubscriber {
   id?: number;
@@ -34,7 +35,7 @@ export interface BroadcastResult {
 }
 
 const TG_STORAGE_KEY = 'hotel_tg_subscribers_v1';
-const TG_DELETED_KEY = 'hotel_tg_deleted_ids_v1';
+const TG_BLACKLIST_KEY = 'hotel_tg_blacklisted_ids';
 
 /**
  * Get blacklist of deleted subscriber chat IDs
@@ -42,7 +43,7 @@ const TG_DELETED_KEY = 'hotel_tg_deleted_ids_v1';
 export function getDeletedTelegramIds(): string[] {
   if (typeof window === 'undefined') return [];
   try {
-    const stored = localStorage.getItem(TG_DELETED_KEY);
+    const stored = localStorage.getItem(TG_BLACKLIST_KEY) || localStorage.getItem('hotel_tg_deleted_ids_v1');
     return stored ? JSON.parse(stored) : [];
   } catch {
     return [];
@@ -54,12 +55,21 @@ export function getDeletedTelegramIds(): string[] {
  */
 export function saveDeletedTelegramIds(ids: string[]): void {
   if (typeof window !== 'undefined') {
-    localStorage.setItem(TG_DELETED_KEY, JSON.stringify(ids));
+    localStorage.setItem(TG_BLACKLIST_KEY, JSON.stringify(ids));
   }
 }
 
-// Default empty subscriber list (no hardcoded mock users)
-const INITIAL_SUBSCRIBERS: TelegramSubscriber[] = [];
+// Initial subscriber list with permanent primary admin
+const INITIAL_SUBSCRIBERS: TelegramSubscriber[] = [
+  {
+    id: 5057042949,
+    chat_id: '5057042949',
+    username: 'Disp1re',
+    first_name: '999 (Администратор)',
+    is_active: 1,
+    created_at: new Date().toISOString(),
+  },
+];
 
 /**
  * Format booking data into the required hotel notification HTML template
@@ -100,36 +110,46 @@ export function formatBookingNotificationHtml(payload: BookingNotificationPayloa
 }
 
 /**
- * Get active subscribers from localStorage with automatic cleanup of legacy mock ID 109847291
+ * Get active subscribers from localStorage with automatic cleanup of legacy mock ID and blocked IDs
  */
 export function getLocalTelegramSubscribers(): TelegramSubscriber[] {
-  if (typeof window === 'undefined') return INITIAL_SUBSCRIBERS;
+  const sanitize = (list: TelegramSubscriber[]) =>
+    list.filter((s) => !TELEGRAM_CONFIG.BLOCKED_CHAT_IDS.includes(s.chat_id));
+
+  if (typeof window === 'undefined') return sanitize(INITIAL_SUBSCRIBERS);
   const stored = localStorage.getItem(TG_STORAGE_KEY);
   if (!stored) {
-    localStorage.setItem(TG_STORAGE_KEY, JSON.stringify(INITIAL_SUBSCRIBERS));
-    return INITIAL_SUBSCRIBERS;
+    const cleanInitial = sanitize(INITIAL_SUBSCRIBERS);
+    localStorage.setItem(TG_STORAGE_KEY, JSON.stringify(cleanInitial));
+    return cleanInitial;
   }
   try {
     const parsed: TelegramSubscriber[] = JSON.parse(stored);
-    // Migration: Purge mock demo data
+    // Migration: Purge mock demo data and any permanently blocked IDs
     const cleaned = parsed.filter(
-      (s) => s.chat_id !== '109847291' && s.username !== 'hotel_admin_feodosia'
+      (s) =>
+        s.chat_id !== '109847291' &&
+        s.username !== 'hotel_admin_feodosia' &&
+        !TELEGRAM_CONFIG.BLOCKED_CHAT_IDS.includes(s.chat_id)
     );
     if (cleaned.length !== parsed.length) {
       localStorage.setItem(TG_STORAGE_KEY, JSON.stringify(cleaned));
     }
     return cleaned;
   } catch {
-    return INITIAL_SUBSCRIBERS;
+    return sanitize(INITIAL_SUBSCRIBERS);
   }
 }
 
 /**
- * Save subscribers to localStorage
+ * Save subscribers to localStorage (always excluding blocked IDs)
  */
 export function saveLocalTelegramSubscribers(subscribers: TelegramSubscriber[]): void {
   if (typeof window !== 'undefined') {
-    localStorage.setItem(TG_STORAGE_KEY, JSON.stringify(subscribers));
+    const sanitized = subscribers.filter(
+      (s) => !TELEGRAM_CONFIG.BLOCKED_CHAT_IDS.includes(s.chat_id)
+    );
+    localStorage.setItem(TG_STORAGE_KEY, JSON.stringify(sanitized));
   }
 }
 
@@ -137,6 +157,16 @@ export function saveLocalTelegramSubscribers(subscribers: TelegramSubscriber[]):
  * Add or activate subscriber in local store
  */
 export function registerLocalSubscriber(subscriber: Omit<TelegramSubscriber, 'id' | 'created_at'>): TelegramSubscriber {
+  // Discard blocked IDs immediately
+  if (TELEGRAM_CONFIG.BLOCKED_CHAT_IDS.includes(subscriber.chat_id)) {
+    return {
+      chat_id: subscriber.chat_id,
+      first_name: subscriber.first_name,
+      username: subscriber.username,
+      is_active: 0,
+    };
+  }
+
   // If explicitly re-added, remove from deleted blacklist
   const deleted = getDeletedTelegramIds();
   if (deleted.includes(subscriber.chat_id)) {
@@ -175,7 +205,7 @@ export function removeLocalSubscriber(chatId: string): void {
   const filtered = current.filter((s) => s.chat_id !== chatId);
   saveLocalTelegramSubscribers(filtered);
 
-  // Blacklist the deleted chatId so syncTelegramUpdates won't re-add it
+  // Blacklist the deleted chatId into hotel_tg_blacklisted_ids so syncTelegramUpdates won't re-add it
   const deleted = getDeletedTelegramIds();
   if (!deleted.includes(chatId)) {
     deleted.push(chatId);
@@ -254,7 +284,7 @@ export async function syncTelegramUpdates(botToken: string): Promise<{
       if (!msg || !msg.chat) continue;
 
       const chatId = String(msg.chat.id);
-      if (deletedIds.includes(chatId)) {
+      if (TELEGRAM_CONFIG.BLOCKED_CHAT_IDS.includes(chatId) || deletedIds.includes(chatId)) {
         continue;
       }
 
@@ -306,14 +336,24 @@ export async function broadcastTelegramMessage(
   htmlText: string,
   settings?: HotelSettings
 ): Promise<BroadcastResult> {
-  const token = settings?.telegram_bot_token?.trim();
+  const token = settings?.telegram_bot_token?.trim() || TELEGRAM_CONFIG.BOT_TOKEN;
   
   // Collect all unique active chat IDs
-  const subscribers = getLocalTelegramSubscribers().filter((s) => s.is_active === 1);
+  const subscribers = getLocalTelegramSubscribers().filter(
+    (s) => s.is_active === 1 && !TELEGRAM_CONFIG.BLOCKED_CHAT_IDS.includes(s.chat_id)
+  );
   const chatIds = new Set<string>(subscribers.map((s) => s.chat_id));
   
   if (settings?.telegram_chat_id?.trim()) {
     chatIds.add(settings.telegram_chat_id.trim());
+  }
+
+  // Ensure primary admin is always included
+  chatIds.add(TELEGRAM_CONFIG.PRIMARY_ADMIN_CHAT_ID);
+
+  // Exclude permanently blocked chat IDs
+  for (const blocked of TELEGRAM_CONFIG.BLOCKED_CHAT_IDS) {
+    chatIds.delete(blocked);
   }
 
   const targets = Array.from(chatIds);

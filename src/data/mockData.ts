@@ -13,8 +13,8 @@ export const DEFAULT_SETTINGS: HotelSettings = {
   legal_entity: 'ИП Федотов А. В.',
   legal_inn: '910800123456',
   legal_ogrnip: '321911200012345',
-  telegram_bot_token: '',
-  telegram_chat_id: '',
+  telegram_bot_token: '8697174450:AAHinSrNjUV7YTxHaXLp4vMQ7CFTBF4hz44',
+  telegram_chat_id: '5057042949',
 };
 
 export const INITIAL_ROOMS: Room[] = [

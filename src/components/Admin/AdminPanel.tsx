@@ -26,6 +26,7 @@ import { useHotel } from '../../context/HotelContext';
 import { Room, Booking, HotelSettings } from '../../types';
 import { apiService } from '../../services/api';
 import { TelegramSubscriber } from '../../services/telegramNotification';
+import { TELEGRAM_CONFIG } from '../../config/telegram';
 import './AdminPanel.css';
 
 export const AdminPanel: React.FC = () => {
@@ -72,7 +73,11 @@ export const AdminPanel: React.FC = () => {
   });
   const [bookingsList, setBookingsList] = useState<Booking[]>([]);
   const [roomsList, setRoomsList] = useState<Room[]>([]);
-  const [settingsForm, setSettingsForm] = useState<HotelSettings>(settings);
+  const [settingsForm, setSettingsForm] = useState<HotelSettings>(() => ({
+    ...settings,
+    telegram_bot_token: settings.telegram_bot_token?.trim() || TELEGRAM_CONFIG.BOT_TOKEN,
+    telegram_chat_id: settings.telegram_chat_id?.trim() || TELEGRAM_CONFIG.PRIMARY_ADMIN_CHAT_ID,
+  }));
 
   // Modal for Booking Details / Creation
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
@@ -100,7 +105,11 @@ export const AdminPanel: React.FC = () => {
       setStats(fetchedStats);
       setBookingsList(fetchedBookings);
       setRoomsList(fetchedRooms);
-      setSettingsForm(fetchedSettings);
+      setSettingsForm({
+        ...fetchedSettings,
+        telegram_bot_token: fetchedSettings.telegram_bot_token?.trim() || TELEGRAM_CONFIG.BOT_TOKEN,
+        telegram_chat_id: fetchedSettings.telegram_chat_id?.trim() || TELEGRAM_CONFIG.PRIMARY_ADMIN_CHAT_ID,
+      });
       setTgSubscribers(fetchedSubs);
     } catch (e) {
       console.error(e);
@@ -116,6 +125,11 @@ export const AdminPanel: React.FC = () => {
     const cleanChatId = manualChatId.trim();
     if (!cleanChatId) {
       setManualAddError('Введите Telegram Chat ID');
+      return;
+    }
+
+    if (TELEGRAM_CONFIG.BLOCKED_CHAT_IDS.includes(cleanChatId)) {
+      setManualAddError('Этот Chat ID находится в чёрном списке и заблокирован.');
       return;
     }
 
@@ -153,7 +167,7 @@ export const AdminPanel: React.FC = () => {
     setIsSyncingUpdates(true);
     setSyncStatusMessage(null);
     try {
-      const res = await apiService.syncTelegramUpdates(settingsForm.telegram_bot_token || '');
+      const res = await apiService.syncTelegramUpdates(settingsForm.telegram_bot_token || TELEGRAM_CONFIG.BOT_TOKEN);
       setSyncStatusMessage(res.message);
       setTgSubscribers(res.subscribers);
       if (res.newCount > 0) {
