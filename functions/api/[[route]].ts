@@ -453,6 +453,11 @@ app.get('/telegram/subscribers', async (c) => {
 
 app.post('/telegram/test-notification', async (c) => {
   try {
+    let body: any = {};
+    try {
+      body = await c.req.json();
+    } catch {}
+
     const testMessage = `
 🛎 <b>ТЕСТОВОЕ УВЕДОМЛЕНИЕ</b>
 
@@ -460,7 +465,13 @@ app.post('/telegram/test-notification', async (c) => {
 ⏰ Время проверки: ${new Date().toLocaleTimeString('ru-RU')}
     `.trim();
 
-    await broadcastTelegramNotification(c.env, testMessage);
+    const effectiveEnv: Env = {
+      ...c.env,
+      TELEGRAM_BOT_TOKEN: body?.telegram_bot_token || c.env.TELEGRAM_BOT_TOKEN,
+      TELEGRAM_CHAT_ID: body?.telegram_chat_id || c.env.TELEGRAM_CHAT_ID,
+    };
+
+    await broadcastTelegramNotification(effectiveEnv, testMessage);
     return c.json({ success: true, message: 'Тестовое уведомление разослано подписчикам' });
   } catch (error: any) {
     return c.json({ error: error.message }, 500);

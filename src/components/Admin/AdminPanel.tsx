@@ -171,7 +171,7 @@ export const AdminPanel: React.FC = () => {
     setTestBroadcastStatus(null);
     setTestBroadcastErrors([]);
     try {
-      const res = await apiService.testTelegramBroadcast();
+      const res = await apiService.testTelegramBroadcast(settingsForm);
       setTestBroadcastStatus(res.message);
       if (res.errors && res.errors.length > 0) {
         setTestBroadcastErrors(res.errors);

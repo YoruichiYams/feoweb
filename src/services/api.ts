@@ -475,9 +475,13 @@ export const apiService = {
     return syncTelegramUpdates(botToken);
   },
 
-  async testTelegramBroadcast(): Promise<{ success: boolean; message: string; errors?: string[] }> {
+  async testTelegramBroadcast(overrideSettings?: HotelSettings): Promise<{ success: boolean; message: string; errors?: string[] }> {
     try {
-      const res = await fetch('/api/telegram/test-notification', { method: 'POST' });
+      const res = await fetch('/api/telegram/test-notification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(overrideSettings || {}),
+      });
       if (res.ok) {
         return await res.json();
       }
@@ -485,7 +489,7 @@ export const apiService = {
       // Local fallback
     }
 
-    const settings = await this.getSettings();
+    const settings = overrideSettings || (await this.getSettings());
     const testText = `
 🛎 <b>ТЕСТОВОЕ УВЕДОМЛЕНИЕ</b>
 
