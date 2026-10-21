@@ -1,0 +1,9 @@
+name = "hotel-serdtse-goroda"
+compatibility_date = "2024-11-01"
+pages_build_output_dir = "dist"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "hotel_db"
+database_id = "2c8377b4-9441-4885-93cd-2db12491bb15"
+migrations_dir = "migrations"

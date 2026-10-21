@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+
+# Production build
+dist/
+
+# Cloudflare Wrangler cache
+.wrangler/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment & local files
+.env
+.env.local
+.DS_Store
+Thumbs.db

@@ -1,0 +1,411 @@
+/* SqueezeCarousel.css - Ultra-smooth Accordion Slider with Hardware Acceleration */
+.squeeze-carousel-wrapper {
+  width: 100%;
+  position: relative;
+  margin: 32px 0 24px;
+}
+
+/* Header with Top Controls */
+.squeeze-carousel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.squeeze-carousel-counter {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.squeeze-carousel-arrows {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.squeeze-arrow-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  color: #1E293B;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.squeeze-arrow-btn:hover {
+  background: #5B7364;
+  color: #ffffff;
+  border-color: #5B7364;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(91, 115, 100, 0.35);
+}
+
+/* Accordion Gallery Track */
+.squeeze-carousel-track {
+  display: flex;
+  gap: 12px;
+  height: 480px;
+  width: 100%;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #111827;
+  padding: 10px;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+@media (max-width: 900px) {
+  .squeeze-carousel-track {
+    height: 520px;
+    flex-direction: column;
+    padding: 8px;
+    gap: 8px;
+  }
+}
+
+/* Individual Slide Card (Lamel) with Hardware Acceleration */
+.squeeze-card {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  cursor: pointer;
+  user-select: none;
+  background: #16202E;
+  will-change: width, flex, transform;
+  transform: translateZ(0);
+  transition: width 850ms cubic-bezier(0.65, 0, 0.35, 1),
+              flex 850ms cubic-bezier(0.65, 0, 0.35, 1),
+              transform 850ms cubic-bezier(0.65, 0, 0.35, 1),
+              filter 600ms ease-in-out;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Inactive (Squeezed) State */
+.squeeze-card.is-inactive {
+  flex: 0 0 56px;
+  filter: brightness(0.65) saturate(0.85);
+}
+
+.squeeze-card.is-inactive:hover {
+  filter: brightness(0.85) saturate(1);
+  transform: translateY(-2px) translateZ(0);
+}
+
+@media (max-width: 900px) {
+  .squeeze-card.is-inactive {
+    flex: 0 0 48px;
+  }
+}
+
+/* Active (Expanded) State */
+.squeeze-card.is-active {
+  flex: 1 1 70%;
+  cursor: default;
+  filter: brightness(1) saturate(1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+/* Background Image with Scale Animation */
+.squeeze-card-img-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  will-change: transform;
+  transform: translateZ(0);
+  transition: transform 900ms cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.squeeze-card.is-active img,
+.squeeze-card.is-active .squeeze-card-img-bg {
+  transition: transform 900ms cubic-bezier(0.65, 0, 0.35, 1);
+  transform: scale(1.03) translateZ(0);
+}
+
+/* Gradient Overlay */
+.squeeze-card-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(17, 24, 39, 0.15) 0%,
+    rgba(17, 24, 39, 0.4) 50%,
+    rgba(17, 24, 39, 0.9) 100%
+  );
+  z-index: 2;
+  transition: background 0.4s ease;
+}
+
+.squeeze-card.is-inactive .squeeze-card-overlay {
+  background: rgba(17, 24, 39, 0.6);
+}
+
+/* Squeezed Strip View (Vertical text on desktop) */
+.squeeze-card-squeezed-content {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 6px;
+  animation: squeezeFadeIn 0.3s ease;
+}
+
+@keyframes squeezeFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.squeeze-squeezed-num {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #ffffff;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.squeeze-squeezed-title {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  white-space: nowrap;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #f8fafc;
+  letter-spacing: 0.4px;
+  margin: auto 0;
+}
+
+@media (max-width: 900px) {
+  .squeeze-card-squeezed-content {
+    flex-direction: row;
+    padding: 6px 16px;
+  }
+  .squeeze-squeezed-title {
+    writing-mode: horizontal-tb;
+    transform: none;
+  }
+}
+
+.squeeze-squeezed-price {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #a3c4b1;
+  background: rgba(91, 115, 100, 0.3);
+  padding: 4px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+/* Active card floating badge */
+.squeeze-active-card-badge {
+  position: absolute;
+  top: 18px;
+  left: 20px;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: rgba(17, 24, 39, 0.7);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  color: #ffffff;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+/* Soft Cross-Fade Text Block Below Track */
+.squeeze-details-panel {
+  position: relative;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 18px;
+  padding: 24px 30px;
+  margin-top: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+}
+
+.squeeze-details-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 24px;
+  animation: squeezeCrossFade 400ms cubic-bezier(0.65, 0, 0.35, 1) forwards;
+  transition: opacity 350ms ease-in-out;
+}
+
+@keyframes squeezeCrossFade {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.squeeze-details-main {
+  flex: 1 1 450px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.squeeze-details-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.squeeze-meta-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: #f1f5f9;
+  border-radius: 8px;
+  color: #475569;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.squeeze-details-title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #1E293B;
+  line-height: 1.25;
+}
+
+.squeeze-details-desc {
+  font-size: 0.92rem;
+  color: #64748b;
+  line-height: 1.55;
+  max-width: 680px;
+}
+
+.squeeze-details-amenities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.squeeze-amenity-pill {
+  font-size: 0.78rem;
+  color: #5B7364;
+  background: rgba(91, 115, 100, 0.1);
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+/* Action & Price Block */
+.squeeze-details-action {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.squeeze-price-group {
+  display: flex;
+  flex-direction: column;
+  text-align: right;
+}
+
+@media (max-width: 640px) {
+  .squeeze-price-group {
+    text-align: left;
+  }
+}
+
+.squeeze-price-label {
+  font-size: 0.78rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.squeeze-price-amount {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #1E293B;
+  line-height: 1.1;
+}
+
+.squeeze-price-amount span {
+  color: #5B7364;
+}
+
+/* Brand Sage Button */
+.squeeze-book-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: #5B7364;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 14px 26px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(91, 115, 100, 0.35);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+
+.squeeze-book-btn:hover {
+  background: #4A5F52;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(91, 115, 100, 0.45);
+}
+
+/* Dots Controls */
+.squeeze-dots-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.squeeze-dot-btn {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #cbd5e1;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.squeeze-dot-btn.active {
+  width: 24px;
+  border-radius: 4px;
+  background: #5B7364;
+}
