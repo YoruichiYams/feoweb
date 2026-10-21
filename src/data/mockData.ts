@@ -1,7 +1,7 @@
 import { Room, Service, Review, HotelSettings, Booking } from '../types';
 
 export const DEFAULT_SETTINGS: HotelSettings = {
-  hotel_name: 'Отель «Сердце Города»',
+  hotel_name: 'Гостиница «Победа»',
   hotel_address: 'Республика Крым, г. Феодосия, ул. Победы, д. 36/1',
   hotel_phone: '+7 (995) 171-16-64',
   hotel_phone_raw: '+79951711664',

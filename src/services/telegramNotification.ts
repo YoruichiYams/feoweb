@@ -105,7 +105,7 @@ export function formatBookingNotificationHtml(payload: BookingNotificationPayloa
 ⏰ <b>Ожидаемый заезд:</b> ${payload.arrival_time || '14:00 – 18:00'}
 💬 <b>Пожелания:</b> ${payload.special_requests || 'Нет'}
 
-📍 <i>Отель «Сердце Города» • г. Феодосия, ул. Победы, 36/1</i>
+📍 <i>Гостиница «Победа» • г. Феодосия, ул. Победы, 36/1</i>
   `.trim();
 }
 

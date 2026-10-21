@@ -1,5 +1,5 @@
 -- Cloudflare D1 Migration: 0002_telegram_subscribers.sql
--- Telegram notification subscribers for Hotel "Сердце Города"
+-- Telegram notification subscribers for Гостиница "Победа"
 
 CREATE TABLE IF NOT EXISTS telegram_subscribers (
   id INTEGER PRIMARY KEY AUTOINCREMENT,

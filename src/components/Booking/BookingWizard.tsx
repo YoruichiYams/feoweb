@@ -155,7 +155,7 @@ export const BookingWizard: React.FC = () => {
         <div className="booking-header-bar">
           <div>
             <h1 className="booking-title">Бронирование номеров</h1>
-            <span className="booking-subtitle">Отель «Сердце Города» • г. Феодосия</span>
+            <span className="booking-subtitle">Гостиница «Победа» • г. Феодосия</span>
           </div>
 
           <div className="currency-badge">

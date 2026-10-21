@@ -245,7 +245,7 @@ app.post('/bookings', async (c) => {
 ⏰ <b>Ожидаемый заезд:</b> 14:00
 💬 <b>Пожелания:</b> ${notes || 'Нет'}
 
-📍 <i>Отель «Сердце Города» • г. Феодосия, ул. Победы, 36/1</i>
+📍 <i>Гостиница «Победа» • г. Феодосия, ул. Победы, 36/1</i>
     `.trim();
 
     await broadcastTelegramNotification(c.env, telegramMessage);
@@ -430,7 +430,7 @@ app.post('/telegram/webhook', async (c) => {
 
       const token = c.env.TELEGRAM_BOT_TOKEN?.trim() || '8697174450:AAHinSrNjUV7YTxHaXLp4vMQ7CFTBF4hz44';
       if (token) {
-        const welcomeText = `Здравствуйте, ${firstName}! Вы успешно подключены к уведомлениям отеля „Сердце Города“ (г. Феодосия). Сюда будут мгновенно приходить все новые бронирования.`;
+        const welcomeText = `Здравствуйте, ${firstName}! Вы успешно подключены к уведомлениям гостиницы «Победа» (г. Феодосия). Сюда будут мгновенно приходить все новые бронирования.`;
         await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -471,7 +471,7 @@ app.post('/telegram/test-notification', async (c) => {
     const testMessage = `
 🛎 <b>ТЕСТОВОЕ УВЕДОМЛЕНИЕ</b>
 
-Бот отеля «Сердце Города» (г. Феодосия) настроен и готов к отправке мгновенных уведомлений о бронированиях!
+Бот гостиницы «Победа» (г. Феодосия) настроен и готов к отправке мгновенных уведомлений о бронированиях!
 ⏰ Время проверки: ${new Date().toLocaleTimeString('ru-RU')}
     `.trim();
 

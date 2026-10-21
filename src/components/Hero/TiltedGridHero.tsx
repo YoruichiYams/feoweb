@@ -212,7 +212,7 @@ export const TiltedGridHero: React.FC = () => {
       {/* 1. TOP HEADER (Exact match to heroref.png) */}
       <div className="hero-header-wrap">
         <h1 className="hero-main-title">
-          {settings.hotel_name || 'Отель «Сердце Города»'} <br />
+          {settings.hotel_name || 'Гостиница «Победа»'} <br />
           <span>г. Феодосия</span>
         </h1>
       </div>
@@ -243,7 +243,7 @@ export const TiltedGridHero: React.FC = () => {
             >
               <img
                 src={imageSrc}
-                alt={`Интерьер ${settings.hotel_name || 'отеля «Сердце Города»'} ${idx + 1}`}
+                alt={`Интерьер ${settings.hotel_name || 'гостиницы «Победа»'} ${idx + 1}`}
                 className="tilted-card-img"
                 loading="eager"
                 draggable={false}

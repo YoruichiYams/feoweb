@@ -161,7 +161,7 @@ export const GuestAccount: React.FC = () => {
                 <span style={{ fontSize: '0.85rem', color: '#64748b' }}>Добро пожаловать,</span>
                 <h2 style={{ fontSize: '1.45rem', fontWeight: 800 }}>{activeBooking.guest_name}</h2>
                 <span style={{ fontSize: '0.85rem', color: '#5B7364', fontWeight: 600 }}>
-                  Статус: Участник программы лояльности «Сердце Города»
+                  Статус: Участник программы лояльности «Победа»
                 </span>
               </div>
 
@@ -538,7 +538,7 @@ export const GuestAccount: React.FC = () => {
             <div className="loyalty-promo-side">
               <div className="loyalty-card-mock">
                 <div style={{ fontSize: '0.8rem', opacity: 0.8, textTransform: 'uppercase' }}>
-                  Отель «Сердце Города»
+                  Гостиница «Победа»
                 </div>
                 <div style={{ fontSize: '1.25rem', fontWeight: 800, marginTop: 4 }}>
                   КАРТА ПРЕМИУМ-ГОСТЯ

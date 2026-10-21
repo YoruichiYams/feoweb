@@ -286,7 +286,7 @@ export const AdminPanel: React.FC = () => {
         </style>
       </head>
       <body>
-        <h2>Отель «Сердце Города» (г. Феодосия) — Шахматка бронирований</h2>
+        <h2>Гостиница «Победа» (г. Феодосия) — Шахматка бронирований</h2>
         <p><b>Период:</b> ${periodStr} | <b>Выгружено:</b> ${new Date().toLocaleString('ru-RU')}</p>
         <table border="1">
           <thead>
@@ -341,7 +341,7 @@ export const AdminPanel: React.FC = () => {
               <Shield size={24} />
             </div>
             <h2 style={{ fontSize: '1.45rem', fontWeight: 800 }}>Вход в панель отеля</h2>
-            <p style={{ fontSize: '0.85rem', color: '#64748b' }}>Отель «Сердце Города» (Феодосия)</p>
+            <p style={{ fontSize: '0.85rem', color: '#64748b' }}>Гостиница «Победа» (Феодосия)</p>
           </div>
 
           {loginError && (

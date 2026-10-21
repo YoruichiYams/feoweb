@@ -16,7 +16,7 @@ export const translations = {
     },
     hero: {
       badge: 'ФЕОДОСИЯ • КРЫМ',
-      title: 'Отель «Сердце Города» / г. Феодосия',
+      title: 'Гостиница «Победа» / г. Феодосия',
       subtitle: 'Тихий отдых в историческом центре в 10 минутах от моря',
       checkIn: 'Заезд',
       checkOut: 'Выезд',
@@ -112,7 +112,7 @@ export const translations = {
     contacts: {
       badge: 'Локация и связь',
       title: 'Контакты и как добраться',
-      subtitle: 'Отель «Сердце Города» расположен в курортной части Феодосии по адресу: ул. Победы, д. 36/1. Мы на связи круглосуточно.',
+      subtitle: 'Гостиница «Победа» расположена в курортной части Феодосии по адресу: ул. Победы, д. 36/1. Мы на связи круглосуточно.',
       reception247: 'Стойка регистрации и служба бронирования работают 24/7',
       addressTitle: 'Фактический адрес',
       phoneTitle: 'Телефон отдела бронирования',
@@ -130,7 +130,7 @@ export const translations = {
       byBusText: 'От Центрального автовокзала Феодосии (ул. Энгельса, 28) регулярно курсируют городские маршруты № 2 и № 4 до остановки «Улица Победы» (5–7 минут в пути).',
     },
     footer: {
-      desc: 'Отель «Сердце Города» на ул. Победы, 36/1 в Феодосии: 17 номеров категории 4★, закрытая охраняемая парковка, 850 м до моря.',
+      desc: 'Гостиница «Победа» на ул. Победы, 36/1 в Феодосии: 17 комфортабельных номеров, закрытая охраняемая парковка, 850 м до моря.',
       navTitle: 'Навигация',
       contactsTitle: 'Контакты',
       legalTitle: 'Правовая информация',
@@ -138,11 +138,11 @@ export const translations = {
       termsOfService: 'Правила проживания в отеле',
       refundPolicy: 'Условия отмены бронирования',
       cookiePolicy: 'Политика использования Cookie',
-      rights: 'Все права защищены. Официальный сайт отеля «Сердце Города» (Феодосия).',
+      rights: 'Все права защищены. Официальный сайт гостиницы «Победа» (Феодосия).',
     },
     admin: {
       title: 'Вход в панель отеля',
-      subtitle: 'Отель «Сердце Города» (Феодосия)',
+      subtitle: 'Гостиница «Победа» (Феодосия)',
       login: 'Логин',
       password: 'Пароль',
       submit: 'Войти в систему',
@@ -179,7 +179,7 @@ export const translations = {
     },
     hero: {
       badge: 'FEODOSIA • CRIMEA',
-      title: 'Hotel «Heart of the City» / Feodosia',
+      title: 'Hotel «Pobeda» / Feodosia',
       subtitle: 'Quiet vacation in the historic center, 10 minutes from the sea',
       checkIn: 'Check-in',
       checkOut: 'Check-out',
@@ -275,7 +275,7 @@ export const translations = {
     contacts: {
       badge: 'Location & Contact',
       title: 'Contacts & Directions',
-      subtitle: 'Hotel «Heart of the City» is located in resort Feodosia at 36/1 Pobedy Street. Front desk is open 24/7.',
+      subtitle: 'Hotel «Pobeda» is located in resort Feodosia at 36/1 Pobedy Street. Front desk is open 24/7.',
       reception247: 'Front desk and reservations are available 24/7',
       addressTitle: 'Physical Address',
       phoneTitle: 'Reservation Phone',
@@ -293,7 +293,7 @@ export const translations = {
       byBusText: 'From Feodosia Central Bus Station (28 Engelsa St), city buses #2 and #4 run frequently to the «Pobedy Street» stop (5–7 minutes trip).',
     },
     footer: {
-      desc: 'Hotel «Heart of the City» — comfortable year-round stays in the heart of historic Feodosia by the Black Sea.',
+      desc: 'Hotel «Pobeda» on 36/1 Pobedy St in Feodosia: 17 comfortable rooms, gated private parking, 850 m to the sea.',
       navTitle: 'Navigation',
       contactsTitle: 'Contacts',
       legalTitle: 'Legal Information',
@@ -301,11 +301,11 @@ export const translations = {
       termsOfService: 'Hotel House Rules',
       refundPolicy: 'Cancellation Policy',
       cookiePolicy: 'Cookie Policy',
-      rights: 'All rights reserved. Official website of Hotel «Heart of the City» (Feodosia).',
+      rights: 'All rights reserved. Official website of Hotel «Pobeda» (Feodosia).',
     },
     admin: {
       title: 'Hotel Control Panel Login',
-      subtitle: 'Hotel «Heart of the City» (Feodosia)',
+      subtitle: 'Hotel «Pobeda» (Feodosia)',
       login: 'Username',
       password: 'Password',
       submit: 'Sign In',

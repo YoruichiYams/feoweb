@@ -28,7 +28,7 @@ export const RoomModal: React.FC<RoomModalProps> = ({ room, onClose }) => {
         <div className="modal-header">
           <div>
             <span style={{ fontSize: '0.8rem', color: '#5B7364', fontWeight: 700, textTransform: 'uppercase' }}>
-              {room.type} • Отель «Сердце Города»
+              {room.type} • Гостиница «Победа»
             </span>
             <h3 className="modal-title">{room.title}</h3>
           </div>

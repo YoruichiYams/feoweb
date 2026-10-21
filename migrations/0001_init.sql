@@ -1,5 +1,5 @@
 -- Cloudflare D1 Migration: 0001_init.sql
--- Hotel "Сердце Города" (Heart of the City) - Feodosia, Crimea
+-- Гостиница "Победа" (Pobeda Hotel) - Feodosia, Crimea
 
 CREATE TABLE IF NOT EXISTS rooms (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -137,7 +137,7 @@ INSERT OR IGNORE INTO admins (id, username, password_hash, salt, role) VALUES
 
 -- Seed Settings
 INSERT OR IGNORE INTO settings (key, value) VALUES
-('hotel_name', 'Отель «Сердце Города»'),
+('hotel_name', 'Гостиница «Победа»'),
 ('hotel_address', 'Республика Крым, г. Феодосия, ул. Победы, д. 36/1'),
 ('hotel_phone', '+7 (995) 171-16-64'),
 ('hotel_phone_raw', '+79951711664'),

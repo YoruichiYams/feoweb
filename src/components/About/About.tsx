@@ -11,7 +11,7 @@ export const About: React.FC = () => {
           <div className="about-images-wrapper">
             <img
               src="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1000&q=80"
-              alt="Отель Сердце Города в Феодосии"
+              alt="Гостиница Победа в Феодосии"
               className="about-img-main"
             />
             <img
@@ -28,10 +28,10 @@ export const About: React.FC = () => {
           <div className="about-content">
             <div className="section-eyebrow">ФЕОДОСИЯ • КРЫМ</div>
             <h2 className="section-title">
-              Отель «Сердце Города»
+              Гостиница «Победа»
             </h2>
             <p className="about-lead">
-              Отель расположен в тихом зеленом секторе исторической Феодосии на ул. Победы, 36/1.
+              Гостиница расположена в тихом зеленом секторе исторической Феодосии на ул. Победы, 36/1.
             </p>
             
             <div className="about-facts-list">

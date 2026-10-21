@@ -77,7 +77,7 @@ export const Gallery: React.FC = () => {
       <div className="container">
         <div className="section-header">
           <div className="section-eyebrow">ФОТОГАЛЕРЕЯ • ИНТЕРЬЕРЫ</div>
-          <h2 className="section-title">Галерея «Сердце Города»</h2>
+          <h2 className="section-title">Галерея «Победа»</h2>
           <p className="section-desc">
             Ознакомьтесь с реальными интерьерами наших номеров, уютными общими зонами и живописными окрестностями Феодосии.
           </p>

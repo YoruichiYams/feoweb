@@ -56,7 +56,7 @@ const GALLERY_PHOTOS: GalleryPhoto[] = [
   {
     src: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1400&q=85',
     category: 'territory',
-    title: 'Фасад отеля «Сердце Города»',
+    title: 'Фасад гостиницы «Победа»',
     desc: 'Исторический центр Феодосии, тихая тенистая улица Победы',
   },
   {
@@ -145,7 +145,7 @@ export const GalleryPage: React.FC = () => {
 
           <div className="gallery-page-header">
             <div className="section-eyebrow">ФОТОГАЛЕРЕЯ • ИНТЕРЬЕРЫ</div>
-            <h1 className="gallery-page-title">Фотогалерея отеля «Сердце Города»</h1>
+            <h1 className="gallery-page-title">Фотогалерея гостиницы «Победа»</h1>
             <p className="gallery-page-subtitle">
               Познакомьтесь с реальными интерьерами наших дизайнерских номеров, тихим закрытым внутренним двором и великолепными морскими пейзажами Феодосии.
             </p>
