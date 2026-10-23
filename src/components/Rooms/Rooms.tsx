@@ -37,7 +37,9 @@ export const Rooms: React.FC = () => {
         </div>
 
         {/* Interactive SqueezeCarousel Showcase */}
-        <SqueezeCarousel rooms={rooms} onSelectRoom={(room) => openBookingWithRoom(room)} />
+        <div className="rooms-carousel-desktop">
+          <SqueezeCarousel rooms={rooms} onSelectRoom={(room) => openBookingWithRoom(room)} />
+        </div>
 
         {/* View Mode & Filter Controls */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 14, marginTop: 40, marginBottom: 24 }}>
@@ -53,7 +55,7 @@ export const Rooms: React.FC = () => {
             ))}
           </div>
 
-          <div style={{ display: 'flex', gap: 8 }}>
+          <div className="rooms-view-toggle">
             <button
               className={`btn btn-sm ${viewMode === 'carousel' ? 'btn-primary' : 'btn-secondary'}`}
               onClick={() => setViewMode('carousel')}
@@ -74,8 +76,7 @@ export const Rooms: React.FC = () => {
         </div>
 
         {/* Room Grid (when in grid mode or for filtered listing) */}
-        {viewMode === 'grid' && (
-        <div className="rooms-grid">
+        <div className={`rooms-grid ${viewMode === 'carousel' ? 'rooms-grid-desktop-hidden' : ''}`}>
           {filteredRooms.map((room) => {
             const coverImage =
               room.images && room.images.length > 0
@@ -156,7 +157,6 @@ export const Rooms: React.FC = () => {
             );
           })}
         </div>
-        )}
       </div>
 
       {/* Modal Detail View */}

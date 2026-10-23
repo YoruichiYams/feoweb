@@ -66,14 +66,6 @@
   border: 1px solid rgba(0, 0, 0, 0.08);
 }
 
-@media (max-width: 900px) {
-  .squeeze-carousel-track {
-    height: 520px;
-    flex-direction: column;
-    padding: 8px;
-    gap: 8px;
-  }
-}
 
 /* Individual Slide Card (Lamel) with Hardware Acceleration */
 .squeeze-card {
@@ -103,11 +95,6 @@
   transform: translateY(-2px) translateZ(0);
 }
 
-@media (max-width: 900px) {
-  .squeeze-card.is-inactive {
-    flex: 0 0 48px;
-  }
-}
 
 /* Active (Expanded) State */
 .squeeze-card.is-active {
@@ -196,16 +183,6 @@
   margin: auto 0;
 }
 
-@media (max-width: 900px) {
-  .squeeze-card-squeezed-content {
-    flex-direction: row;
-    padding: 6px 16px;
-  }
-  .squeeze-squeezed-title {
-    writing-mode: horizontal-tb;
-    transform: none;
-  }
-}
 
 .squeeze-squeezed-price {
   font-size: 0.72rem;

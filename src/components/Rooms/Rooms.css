@@ -36,6 +36,19 @@
 }
 
 /* Rooms Grid */
+.rooms-carousel-desktop {
+  display: block;
+}
+
+.rooms-grid-desktop-hidden {
+  display: none;
+}
+
+.rooms-view-toggle {
+  display: flex;
+  gap: 8px;
+}
+
 .rooms-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -45,6 +58,29 @@
 @media (max-width: 1080px) {
   .rooms-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  /* Полностью выключаем слайдер на мобильных */
+  .rooms-carousel-desktop {
+    display: none !important;
+  }
+
+  /* Скрываем переключатель режима просмотра */
+  .rooms-view-toggle {
+    display: none !important;
+  }
+
+  /* На мобильных экранах сетка карточек отображается всегда */
+  .rooms-grid.rooms-grid-desktop-hidden {
+    display: grid !important;
+  }
+
+  /* 1 колонка карточек с аккуратными отступами */
+  .rooms-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
   }
 }
 
