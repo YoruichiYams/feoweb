@@ -21,13 +21,52 @@ import {
   AlertCircle,
   CheckCircle,
   Download,
+  FileSpreadsheet,
+  Loader2,
 } from 'lucide-react';
 import { useHotel } from '../../context/HotelContext';
 import { Room, Booking, HotelSettings } from '../../types';
+import { generateHotelReport } from '../../services/excelExportService';
 import { apiService } from '../../services/api';
 import { TelegramSubscriber } from '../../services/telegramNotification';
 import { TELEGRAM_CONFIG } from '../../config/telegram';
 import './AdminPanel.css';
+
+type ExportPresetId = 'week' | 'month' | 'next_month' | 'season2026' | 'custom';
+
+function getPresetDates(preset: ExportPresetId): { start: string; end: string } {
+  const now = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const format = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+
+  switch (preset) {
+    case 'week': {
+      const day = now.getDay();
+      const diffToMon = (day === 0 ? -6 : 1) - day;
+      const monday = new Date(now);
+      monday.setDate(now.getDate() + diffToMon);
+      const sunday = new Date(monday);
+      sunday.setDate(monday.getDate() + 6);
+      return { start: format(monday), end: format(sunday) };
+    }
+    case 'month': {
+      const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+      const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      return { start: format(firstDay), end: format(lastDay) };
+    }
+    case 'next_month': {
+      const firstDay = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+      const lastDay = new Date(now.getFullYear(), now.getMonth() + 2, 0);
+      return { start: format(firstDay), end: format(lastDay) };
+    }
+    case 'season2026': {
+      return { start: '2026-06-01', end: '2026-08-31' };
+    }
+    case 'custom':
+    default:
+      return { start: '', end: '' };
+  }
+}
 
 export const AdminPanel: React.FC = () => {
   const { setCurrentPage, settings, refreshData } = useHotel();
@@ -92,6 +131,27 @@ export const AdminPanel: React.FC = () => {
     children: 0,
     totalPrice: 6400,
   });
+
+  // Excel Export Modal State
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [exportPreset, setExportPreset] = useState<ExportPresetId>('month');
+  const [exportStartDate, setExportStartDate] = useState(() => {
+    const dates = getPresetDates('month');
+    return dates.start;
+  });
+  const [exportEndDate, setExportEndDate] = useState(() => {
+    const dates = getPresetDates('month');
+    return dates.end;
+  });
+  const [exportSheets, setExportSheets] = useState({
+    chessboard: true,
+    bookingsRegistry: true,
+    arrivalsDepartures: true,
+    kpiSummary: true,
+  });
+  const [isExporting, setIsExporting] = useState(false);
+  const [exportSuccessMessage, setExportSuccessMessage] = useState<string | null>(null);
+  const [exportErrorMessage, setExportErrorMessage] = useState<string | null>(null);
 
   const loadAdminData = async () => {
     try {
@@ -270,67 +330,93 @@ export const AdminPanel: React.FC = () => {
     };
   });
 
-  const handleExportChessboardToExcel = () => {
-    const periodStr = `${daysInMonth[0]?.dateStr} — ${daysInMonth[daysInMonth.length - 1]?.dateStr}`;
-    let html = `
-      <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
-      <head>
-        <meta charset="utf-8">
-        <!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Шахматка</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->
-        <style>
-          th { background-color: #5B7364; color: #FFFFFF; font-weight: bold; border: 1px solid #CCCCCC; padding: 6px; text-align: center; }
-          td { border: 1px solid #CCCCCC; padding: 6px; text-align: center; font-size: 11pt; }
-          .room-col { text-align: left; font-weight: bold; background-color: #F8FAF9; }
-          .occupied { background-color: #DCFCE7; color: #166534; font-weight: bold; }
-          .free { background-color: #FFFFFF; color: #94A3B8; }
-        </style>
-      </head>
-      <body>
-        <h2>Гостиница «Победа» (г. Феодосия) — Шахматка бронирований</h2>
-        <p><b>Период:</b> ${periodStr} | <b>Выгружено:</b> ${new Date().toLocaleString('ru-RU')}</p>
-        <table border="1">
-          <thead>
-            <tr>
-              <th>Номер / Категория</th>
-              <th>Базовая цена (₽)</th>
-              ${daysInMonth.map((d) => `<th>${d.dayNum} (${d.weekday})</th>`).join('')}
-            </tr>
-          </thead>
-          <tbody>
-            ${roomsList.map((room) => {
-      const cells = daysInMonth.map((day) => {
-        const b = bookingsList.find(
-          (bk) => bk.room_id === room.id && bk.status !== 'cancelled' && day.dateStr >= bk.check_in && day.dateStr < bk.check_out
-        );
-        if (b) {
-          return `<td class="occupied">${b.guest_name} (${b.guest_phone || b.booking_number})</td>`;
-        }
-        return `<td class="free">—</td>`;
-      }).join('');
-      return `
-                <tr>
-                  <td class="room-col">${room.title}</td>
-                  <td>${room.price_base}</td>
-                  ${cells}
-                </tr>
-              `;
-    }).join('')}
-          </tbody>
-        </table>
-      </body>
-      </html>
-    `;
-
-    const blob = new Blob([html], { type: 'application/vnd.ms-excel;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `shakhmatka_${new Date().toISOString().split('T')[0]}.xls`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+  const handleSelectPreset = (preset: 'week' | 'month' | 'next_month' | 'season2026') => {
+    setExportPreset(preset);
+    const dates = getPresetDates(preset);
+    if (dates.start && dates.end) {
+      setExportStartDate(dates.start);
+      setExportEndDate(dates.end);
+    }
   };
+
+  const handleToggleAllSheets = (selected: boolean) => {
+    setExportSheets({
+      chessboard: selected,
+      bookingsRegistry: selected,
+      arrivalsDepartures: selected,
+      kpiSummary: selected,
+    });
+  };
+
+  const handleRunExcelExport = async () => {
+    if (!exportStartDate || !exportEndDate) {
+      setExportErrorMessage('Укажите начальную и конечную дату периода');
+      return;
+    }
+    if (exportStartDate > exportEndDate) {
+      setExportErrorMessage('Начальная дата не может быть позже конечной');
+      return;
+    }
+    const hasAnySheet = Object.values(exportSheets).some(Boolean);
+    if (!hasAnySheet) {
+      setExportErrorMessage('Выберите хотя бы один лист для формирования отчета');
+      return;
+    }
+
+    setIsExporting(true);
+    setExportErrorMessage(null);
+    setExportSuccessMessage(null);
+
+    try {
+      await generateHotelReport({
+        rooms: roomsList,
+        bookings: bookingsList,
+        settings: settingsForm,
+        startDate: exportStartDate,
+        endDate: exportEndDate,
+        includedSheets: exportSheets,
+      });
+
+      setExportSuccessMessage('Отчет успешно сформирован и скачан!');
+      setTimeout(() => {
+        setExportSuccessMessage(null);
+      }, 4000);
+    } catch (err: any) {
+      console.error('Excel Export Error:', err);
+      setExportErrorMessage(err?.message || 'Не удалось сформировать файл отчета');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const exportDaysCount = React.useMemo(() => {
+    if (!exportStartDate || !exportEndDate || exportStartDate > exportEndDate) return 0;
+    const s = new Date(exportStartDate).getTime();
+    const e = new Date(exportEndDate).getTime();
+    return Math.max(0, Math.round((e - s) / 86400000) + 1);
+  }, [exportStartDate, exportEndDate]);
+
+  const exportMatchingBookings = React.useMemo(() => {
+    if (!exportStartDate || !exportEndDate) return [];
+    return bookingsList.filter((b) => b.check_in <= exportEndDate && b.check_out >= exportStartDate);
+  }, [bookingsList, exportStartDate, exportEndDate]);
+
+  const exportPeriodRevenue = React.useMemo(() => {
+    if (!exportStartDate || !exportEndDate) return 0;
+    let rev = 0;
+    exportMatchingBookings.forEach((b) => {
+      if (b.status === 'cancelled') return;
+      const totalNights = Math.max(1, Math.round((new Date(b.check_out).getTime() - new Date(b.check_in).getTime()) / 86400000));
+      const overlapStart = new Date(Math.max(new Date(b.check_in).getTime(), new Date(exportStartDate).getTime()));
+      const overlapEnd = new Date(Math.min(new Date(b.check_out).getTime(), new Date(exportEndDate).getTime() + 86400000));
+      const overlapNights = Math.max(0, Math.round((overlapEnd.getTime() - overlapStart.getTime()) / 86400000));
+      rev += (b.total_price / totalNights) * overlapNights;
+    });
+    return Math.round(rev);
+  }, [exportMatchingBookings, exportStartDate, exportEndDate]);
+
+  const selectedSheetsCount = Object.values(exportSheets).filter(Boolean).length;
+
 
   if (!isAuthenticated) {
     return (
@@ -516,15 +602,26 @@ export const AdminPanel: React.FC = () => {
 
             {/* Recent Bookings Table */}
             <div className="admin-data-card">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
                 <h3 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Все бронирования отеля</h3>
-                <button
-                  className="btn btn-primary btn-sm"
-                  onClick={() => setIsNewBookingModalOpen(true)}
-                >
-                  <Plus size={16} />
-                  <span>Создать бронь от стойки</span>
-                </button>
+                <div style={{ display: 'flex', gap: 10 }}>
+                  <button
+                    type="button"
+                    className="btn btn-secondary btn-sm"
+                    onClick={() => setIsExportModalOpen(true)}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
+                  >
+                    <Download size={15} />
+                    <span>Экспорт в Excel</span>
+                  </button>
+                  <button
+                    className="btn btn-primary btn-sm"
+                    onClick={() => setIsNewBookingModalOpen(true)}
+                  >
+                    <Plus size={16} />
+                    <span>Создать бронь от стойки</span>
+                  </button>
+                </div>
               </div>
 
               <table className="admin-table">
@@ -582,18 +679,18 @@ export const AdminPanel: React.FC = () => {
                 </p>
               </div>
 
-              <div style={{ display: 'flex', gap: 10 }}>
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
                 <button
                   type="button"
-                  className="btn btn-secondary btn-sm"
-                  onClick={handleExportChessboardToExcel}
+                  className="btn btn-primary btn-sm"
+                  onClick={() => setIsExportModalOpen(true)}
                   style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
                 >
                   <Download size={15} />
-                  <span>Скачать в Excel (.xls)</span>
+                  <span>Экспорт отчетов в Excel (.xlsx)</span>
                 </button>
                 <button
-                  className="btn btn-primary btn-sm"
+                  className="btn btn-secondary btn-sm"
                   onClick={() => setIsNewBookingModalOpen(true)}
                 >
                   <Plus size={16} />
@@ -1384,7 +1481,264 @@ export const AdminPanel: React.FC = () => {
             </div>
           </div>
         )}
+
+        {/* Modal: Export Reports to Excel */}
+        {isExportModalOpen && (
+          <div className="modal-overlay" onClick={() => !isExporting && setIsExportModalOpen(false)}>
+            <div className="modal-content modal-content-lg export-modal-content" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div className="export-modal-icon-badge">
+                    <FileSpreadsheet size={22} />
+                  </div>
+                  <div>
+                    <h3 className="modal-title">Экспорт отчетов в Excel (.xlsx)</h3>
+                    <p style={{ fontSize: '0.82rem', color: '#64748b', margin: 0 }}>
+                      {settingsForm.hotel_name || 'Гостиница «Победа»'} • Формирование книги OpenXML со всеми листами
+                    </p>
+                  </div>
+                </div>
+                <button
+                  className="modal-close-btn"
+                  disabled={isExporting}
+                  onClick={() => setIsExportModalOpen(false)}
+                  title="Закрыть"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="modal-body export-modal-body">
+                {/* Alerts */}
+                {exportSuccessMessage && (
+                  <div className="export-alert-box success">
+                    <CheckCircle size={18} />
+                    <span>{exportSuccessMessage}</span>
+                  </div>
+                )}
+                {exportErrorMessage && (
+                  <div className="export-alert-box error">
+                    <AlertCircle size={18} />
+                    <span>{exportErrorMessage}</span>
+                  </div>
+                )}
+
+                {/* Section 1: Period Selection */}
+                <div className="export-section">
+                  <label className="export-section-label">1. Период выгрузки</label>
+
+                  {/* Quick Presets */}
+                  <div className="export-presets-grid">
+                    <button
+                      type="button"
+                      className={`export-preset-btn ${exportPreset === 'week' ? 'active' : ''}`}
+                      onClick={() => handleSelectPreset('week')}
+                    >
+                      Текущая неделя
+                    </button>
+                    <button
+                      type="button"
+                      className={`export-preset-btn ${exportPreset === 'month' ? 'active' : ''}`}
+                      onClick={() => handleSelectPreset('month')}
+                    >
+                      Текущий месяц
+                    </button>
+                    <button
+                      type="button"
+                      className={`export-preset-btn ${exportPreset === 'next_month' ? 'active' : ''}`}
+                      onClick={() => handleSelectPreset('next_month')}
+                    >
+                      Следующий месяц
+                    </button>
+                    <button
+                      type="button"
+                      className={`export-preset-btn ${exportPreset === 'season2026' ? 'active' : ''}`}
+                      onClick={() => handleSelectPreset('season2026')}
+                    >
+                      Сезон 2026 (Июнь–Авг)
+                    </button>
+                  </div>
+
+                  {/* Custom Date Pickers */}
+                  <div className="export-dates-row">
+                    <div className="export-date-field">
+                      <label className="input-label">Дата начала (Заезд от)</label>
+                      <input
+                        type="date"
+                        className="input-control"
+                        value={exportStartDate}
+                        onChange={(e) => {
+                          setExportStartDate(e.target.value);
+                          setExportPreset('custom');
+                        }}
+                      />
+                    </div>
+                    <div className="export-date-field">
+                      <label className="input-label">Дата окончания (Выезд до)</label>
+                      <input
+                        type="date"
+                        className="input-control"
+                        value={exportEndDate}
+                        onChange={(e) => {
+                          setExportEndDate(e.target.value);
+                          setExportPreset('custom');
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Section 2: Sheet Inclusion Settings */}
+                <div className="export-section">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                    <label className="export-section-label" style={{ margin: 0 }}>2. Состав книги отчета</label>
+                    <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                      <button
+                        type="button"
+                        className="export-toggle-link"
+                        onClick={() => handleToggleAllSheets(true)}
+                      >
+                        Выбрать все
+                      </button>
+                      <span style={{ color: '#cbd5e1' }}>•</span>
+                      <button
+                        type="button"
+                        className="export-toggle-link"
+                        onClick={() => handleToggleAllSheets(false)}
+                      >
+                        Снять все
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="export-sheets-grid">
+                    {/* Sheet 1: Chessboard */}
+                    <label className={`export-sheet-card ${exportSheets.chessboard ? 'selected' : ''}`}>
+                      <div className="export-sheet-checkbox-wrap">
+                        <input
+                          type="checkbox"
+                          checked={exportSheets.chessboard}
+                          onChange={(e) => setExportSheets({ ...exportSheets, chessboard: e.target.checked })}
+                        />
+                      </div>
+                      <div className="export-sheet-info">
+                        <div className="export-sheet-title">Лист 1: Шахматка фонда</div>
+                        <div className="export-sheet-desc">
+                          Сетка занятости номеров с закреплением областей, базовыми ценами, статусами гостей и формулами загрузки
+                        </div>
+                      </div>
+                    </label>
+
+                    {/* Sheet 2: Bookings Registry */}
+                    <label className={`export-sheet-card ${exportSheets.bookingsRegistry ? 'selected' : ''}`}>
+                      <div className="export-sheet-checkbox-wrap">
+                        <input
+                          type="checkbox"
+                          checked={exportSheets.bookingsRegistry}
+                          onChange={(e) => setExportSheets({ ...exportSheets, bookingsRegistry: e.target.checked })}
+                        />
+                      </div>
+                      <div className="export-sheet-info">
+                        <div className="export-sheet-title">Лист 2: Реестр бронирований</div>
+                        <div className="export-sheet-desc">
+                          Плоская таблица всех броней с встроенным автофильтром, контактами, тарифами, статусами и формулой ИТОГО
+                        </div>
+                      </div>
+                    </label>
+
+                    {/* Sheet 3: Arrivals & Departures */}
+                    <label className={`export-sheet-card ${exportSheets.arrivalsDepartures ? 'selected' : ''}`}>
+                      <div className="export-sheet-checkbox-wrap">
+                        <input
+                          type="checkbox"
+                          checked={exportSheets.arrivalsDepartures}
+                          onChange={(e) => setExportSheets({ ...exportSheets, arrivalsDepartures: e.target.checked })}
+                        />
+                      </div>
+                      <div className="export-sheet-info">
+                        <div className="export-sheet-title">Лист 3: Заезды и выезды</div>
+                        <div className="export-sheet-desc">
+                          Две раздельные секции: ожидаемые заезды с суммами и контактами, выезды с отметками для службы клининга
+                        </div>
+                      </div>
+                    </label>
+
+                    {/* Sheet 4: KPI Summary */}
+                    <label className={`export-sheet-card ${exportSheets.kpiSummary ? 'selected' : ''}`}>
+                      <div className="export-sheet-checkbox-wrap">
+                        <input
+                          type="checkbox"
+                          checked={exportSheets.kpiSummary}
+                          onChange={(e) => setExportSheets({ ...exportSheets, kpiSummary: e.target.checked })}
+                        />
+                      </div>
+                      <div className="export-sheet-info">
+                        <div className="export-sheet-title">Лист 4: Сводка и KPI</div>
+                        <div className="export-sheet-desc">
+                          Ключевые метрики (выручка, ночи, загрузка, ADR, RevPAR, чек) и таблица доходности по категориям
+                        </div>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                {/* Dynamic Summary Card */}
+                <div className="export-summary-card">
+                  <div className="export-summary-grid">
+                    <div className="export-summary-item">
+                      <span className="export-summary-label">Дней в периоде</span>
+                      <strong className="export-summary-val">{exportDaysCount} дн.</strong>
+                    </div>
+                    <div className="export-summary-item">
+                      <span className="export-summary-label">Бронирований</span>
+                      <strong className="export-summary-val">{exportMatchingBookings.length} шт.</strong>
+                    </div>
+                    <div className="export-summary-item">
+                      <span className="export-summary-label">Выручка периода</span>
+                      <strong className="export-summary-val">{exportPeriodRevenue.toLocaleString('ru-RU')} ₽</strong>
+                    </div>
+                    <div className="export-summary-item">
+                      <span className="export-summary-label">Выбрано листов</span>
+                      <strong className="export-summary-val">{selectedSheetsCount} из 4</strong>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Footer Buttons */}
+                <div className="export-modal-footer">
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    disabled={isExporting}
+                    onClick={() => setIsExportModalOpen(false)}
+                  >
+                    Отмена
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-primary export-generate-btn"
+                    disabled={isExporting || selectedSheetsCount === 0 || !exportStartDate || !exportEndDate || exportStartDate > exportEndDate}
+                    onClick={handleRunExcelExport}
+                  >
+                    {isExporting ? (
+                      <>
+                        <Loader2 size={18} className="spin-animation" />
+                        <span>Генерация книги Excel...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Download size={18} />
+                        <span>Сформировать и скачать .xlsx</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
+
     </div>
   );
 };

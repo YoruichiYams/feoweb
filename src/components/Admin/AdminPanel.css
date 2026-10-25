@@ -362,3 +362,294 @@
     padding: 16px !important;
   }
 }
+
+/* ==========================================================================
+   EXCEL EXPORT MODAL (Avenue TravelLine Aesthetic)
+   ========================================================================== */
+
+.export-modal-content {
+  max-width: 720px !important;
+  border: 1px solid var(--color-border);
+  box-shadow: 0 20px 50px rgba(28, 29, 26, 0.16);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.export-modal-icon-badge {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--color-primary-tint);
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.export-modal-body {
+  padding: 24px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  background: #ffffff;
+}
+
+.export-alert-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  font-size: 0.88rem;
+  font-weight: 600;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+.export-alert-box.success {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+
+.export-alert-box.error {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+.export-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.export-section-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-main);
+}
+
+.export-presets-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.export-preset-btn {
+  padding: 8px 10px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #475569;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.export-preset-btn:hover {
+  background: #f1f5f9;
+  color: var(--color-text-main);
+  border-color: #cbd5e1;
+}
+
+.export-preset-btn.active {
+  background: var(--color-primary);
+  color: #ffffff;
+  border-color: var(--color-primary);
+  box-shadow: 0 2px 8px rgba(74, 99, 83, 0.28);
+}
+
+.export-dates-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 4px;
+}
+
+.export-date-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.export-toggle-link {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  transition: color var(--transition-fast);
+}
+
+.export-toggle-link:hover {
+  color: var(--color-primary-dark);
+}
+
+.export-sheets-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.export-sheet-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: #ffffff;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  position: relative;
+}
+
+.export-sheet-card:hover {
+  border-color: #cbd5e1;
+  background: #fafaf9;
+}
+
+.export-sheet-card.selected {
+  border-color: var(--color-primary);
+  background: var(--color-primary-subtle);
+  box-shadow: 0 1px 6px rgba(74, 99, 83, 0.12);
+}
+
+.export-sheet-checkbox-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 2px;
+}
+
+.export-sheet-checkbox-wrap input[type="checkbox"] {
+  width: 17px;
+  height: 17px;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+}
+
+.export-sheet-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.export-sheet-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--color-text-main);
+  line-height: 1.25;
+}
+
+.export-sheet-desc {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  line-height: 1.35;
+}
+
+.export-summary-card {
+  background: var(--color-sand);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+}
+
+.export-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+.export-summary-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.export-summary-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+.export-summary-val {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--color-text-main);
+  font-family: var(--font-body);
+}
+
+.export-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--color-border);
+}
+
+.export-generate-btn {
+  background: var(--color-primary) !important;
+  color: #ffffff !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  padding: 11px 24px;
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+}
+
+.export-generate-btn:hover:not(:disabled) {
+  background: var(--color-primary-hover) !important;
+  box-shadow: 0 4px 14px rgba(74, 99, 83, 0.3);
+}
+
+.export-generate-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.spin-animation {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 640px) {
+  .export-presets-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .export-sheets-grid {
+    grid-template-columns: 1fr;
+  }
+  .export-dates-row {
+    grid-template-columns: 1fr;
+  }
+  .export-summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+}
+
